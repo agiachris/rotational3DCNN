@@ -11,8 +11,6 @@ class ShapeNet(Dataset):
         transforms of the complete models.
         """
 
-        
-
     def __len__(self):
         return 0
 

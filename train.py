@@ -12,6 +12,9 @@ class Trainer:
 
     def __init__(self, args):
 
+        # directories
+        base_dir = os.path.realpath(args.config)
+
         # acquire configuration file
         config = get_config(args.config)
         self.config = config
