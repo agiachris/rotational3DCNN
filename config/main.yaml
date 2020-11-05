@@ -9,4 +9,7 @@ model: baseline
 
 # experiment
 exp_dir: exp
-exp_name: experiment_name
+exp_name: baseline_test
+
+# dataset
+data_path: data
