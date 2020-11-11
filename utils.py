@@ -9,14 +9,16 @@ from models import UNet3dBaseline
 def get_config(path, config_file):
     """Load YAML configuration file
     """
-    return yaml.load(os.path.join(path, config_file))
+    with open(os.path.join(path, config_file), 'r') as config_stream:
+        config = yaml.safe_load(config_stream)
+    return config
 
 
 def get_model(config):
     """Return the model specified in the configuration object
     """
     if config['model'] == "baseline":
-        return UNet3dBaseline.UNet3dBaseline(config['model_config'])
+        return UNet3dBaseline.UNet3dBaseline()
 
 
 def get_model_name(config, epoch):

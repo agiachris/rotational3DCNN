@@ -35,7 +35,7 @@ class Trainer:
             print("Error: This experiment already exists")
             print("Cancel Session:    0")
             print("Overwrite:         1")
-            if input() == 0:
+            if input() == str(1):
                 shutil.rmtree(self.exp_dir)
             else:
                 exit(1)
