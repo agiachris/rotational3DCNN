@@ -15,33 +15,21 @@ def visualize_df(tensor):
     if len(tensor.shape) == 4:
         tensor = np.squeeze(tensor, 0)
 
-    # display full distance field
-    x, y, z = np.indices(tensor.shape).reshape(3, -1)
-    color = tensor[x, y, z]
-
-    #fig = plt.figure("Full DF")
-    #ax = fig.add_subplot(111, projection='3d')
-    #ax.scatter(x, -z, y, zdir='z', c=cm.jet(color), s=0.6)
-    #plt.show()
-
-    # The following portion attempts to extract the shape from the DF
-    # # display zero voxels in DF
-    x, y, z = np.where(tensor <= 0.5)
-    color = tensor[x, y, z]
-    #
-    fig2 = plt.figure("Zero DF")
-    ax2 = fig2.add_subplot(111, projection='3d')
-    ax2.scatter(z, x, y, zdir='z', s=150)
-    plt.show()
+    #x, y, z = np.where(tensor <= 0.5)
+    #color = tensor[x, y, z]
     
-    # # display non-zeros voxels in DF
-    x, y, z = tensor.nonzero()
-    color = tensor[x, y, z]
-    #
-    #fig3 = plt.figure("Non-Zero DF")
-    #ax3 = fig3.add_subplot(111, projection='3d')
-    #ax3.scatter(z, x, y, zdir='z', c=cm.jet(color), s=0.6)
+    #fig2 = plt.figure("Zero DF")
+    #ax2 = fig2.add_subplot(111, projection='3d')
+    #ax2.scatter(z, x, y, marker='s', zdir='z', s=100)
     #plt.show()
+
+    volume = np.less_equal(tensor, 0.5)
+    volumeTransposed = np.transpose(volume, (2, 0, 1))
+    
+    fig2 = plt.figure("Zero DF with voxels")
+    ax2 = fig2.add_subplot(111, projection='3d')
+    ax2.voxels(volumeTransposed)
+    plt.show()
 
 
 def visualize_sdf(tensor):
