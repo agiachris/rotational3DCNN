@@ -20,9 +20,9 @@ def conv_trans_block_3d(in_dim, out_dim, activation):
 def max_pooling_3d():
     return nn.MaxPool3d(kernel_size=2, stride=2, padding=0)
 
-class UNet(nn.Module):
+class UNet3dBaseline(nn.Module):
     def __init__(self, in_dim, out_dim, num_filters):
-        super(UNet, self).__init__()
+        super(UNet3dBaseline, self).__init__()
         
         self.in_dim = in_dim
         self.out_dim = out_dim
