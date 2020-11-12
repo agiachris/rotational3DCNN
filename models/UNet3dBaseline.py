@@ -16,7 +16,6 @@ def conv_trans_block_3d(in_dim, out_dim, activation):
         nn.ConvTranspose3d(in_dim, out_dim, kernel_size=3, stride=2, padding=1, output_padding=1),
         nn.BatchNorm3d(out_dim),
         activation,)
-
 #pooling
 def max_pooling_3d():
     return nn.MaxPool3d(kernel_size=2, stride=2, padding=0)
@@ -36,14 +35,11 @@ class UNet(nn.Module):
         self.down_2 = conv_block_3d(self.num_filters, self.num_filters * 2, activation)
         self.down_3 = conv_block_3d(self.num_filters * 2, self.num_filters * 4, activation)
         self.down_4 = conv_block_3d(self.num_filters * 4, self.num_filters * 8, activation)
-        self.down_5 = conv_block_3d(self.num_filters * 8, self.num_filters * 16, activation)
         
         # Bridge
         self.bridge = conv_block_3d(self.num_filters * 16, self.num_filters * 32, activation)
         
         # Up sampling
-        self.trans_1 = conv_trans_block_3d(self.num_filters * 32, self.num_filters * 32, activation)
-        self.up_1 = conv_block_3d(self.num_filters * 48, self.num_filters * 16, activation)
         self.trans_2 = conv_trans_block_3d(self.num_filters * 16, self.num_filters * 16, activation)
         self.up_2 = conv_block_3d(self.num_filters * 24, self.num_filters * 8, activation)
         self.trans_3 = conv_trans_block_3d(self.num_filters * 8, self.num_filters * 8, activation)
@@ -69,19 +65,12 @@ class UNet(nn.Module):
         
         down_4 = self.down_4(pool_3) # shape [1, 32, 16, 16, 16]
         pool_4 = self.pool(down_4) # shape [1, 32, 8, 8, 8]
-        
-        down_5 = self.down_5(pool_4) # shape [1, 64, 8, 8, 8]
-        pool_5 = self.pool(down_5) # shape [1, 64, 4, 4, 4]
-        
+                
         # Bridge
-        bridge = self.bridge(pool_5) # shape [1, 128, 4, 4, 4]
+        bridge = self.bridge(pool_4) # shape [1, 128, 4, 4, 4]
         
         # Up 
-        trans_1 = self.trans_1(bridge) # shape [1, 128, 8, 8, 8]
-        concat_1 = torch.cat([trans_1, down_5], dim=1) # shape [1, 192, 8, 8, 8]
-        up_1 = self.up_1(concat_1) # shape [1, 64, 8, 8, 8]
-        
-        trans_2 = self.trans_2(up_1) # shape [1, 64, 16, 16, 16]
+        trans_2 = self.trans_2(bridge) # shape [1, 64, 16, 16, 16]
         concat_2 = torch.cat([trans_2, down_4], dim=1) # shape [1, 96, 16, 16, 16]
         up_2 = self.up_2(concat_2) # shape [1, 32, 16, 16, 16]
         

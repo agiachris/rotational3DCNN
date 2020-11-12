@@ -1,13 +1,15 @@
 # hyper-parameters
-batch_size: 32
+batch_size: 8
 lr: 1e-4
 dr: 5e-4
-
 num_epochs: 10
 
 # model
 model: baseline
 
 # experiment
-exp_dir: exp/fill
-exp_name: experiment_name
+exp_dir: exp
+exp_name: baseline_test
+
+# dataset
+data_path: data
