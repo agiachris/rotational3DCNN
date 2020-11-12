@@ -3,6 +3,7 @@ import torch
 
 '''
 example usage 
+
 data = [[[[0, 0],[0, 0]],[[0, 1],[1, 1]]], [[[1, 1],[0, 1]],[[0, 0],[1, 1]]]]
 data_tensor = torch.FloatTensor(data)
 label = [[[[1, 0],[0, 1]],[[0, 1],[1, 1]]], [[[0, 1],[1, 0]],[[1, 1],[1, 1]]]]
@@ -11,7 +12,6 @@ metric = Metric()
 print(metric.get_iou_per_batch(data_tensor, label_tensor))
 print(metric.get_accuracy_per_batch(data_tensor, label_tensor))
 '''
-
 
 class Metric:
     # takes Height x Width x Length tensor filled with 0/1
