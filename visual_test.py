@@ -1,7 +1,7 @@
 import os
 from utils import *
 from torch.utils.data import DataLoader
-from dataset.visualization import *
+from dataset.visualization2 import *
 import torch
 from dataset.data_utils import *
 from torch.utils.data import Dataset
@@ -25,6 +25,6 @@ if __name__ == "__main__":
 
 	# visualization of a random sample
 	sample = out
-	visualize_sdf(sample['inputs'].numpy())
+	#visualize_sdf(sample['inputs'].numpy())
 	visualize_df(sample['targets'].numpy())
 
