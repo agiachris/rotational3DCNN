@@ -93,5 +93,50 @@ def visualize_sdf_voxel(tensor):
     ax = fig.add_subplot(111, projection='3d')
     ax.voxels(volumeTransposed)
 
+
 def show():
+    """ Shows all constructed figures. Mainly for visualizing multiple 3D figures at once
+    """
+    plt.show()
+
+
+def plot_curves(loss, iou, accuracy, metadata):
+    """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and 		corresponsding metadata
+
+    Args:
+        loss: nxi array of losses, where n - number of curves to compare (usually train vs 		validation) and i - number of iterations for the plot
+
+        iou: nxi array of intersection over union values, where n - number of curves to compare 	(usually train vs validation) and i - number of iterations for the plot
+
+        accuracy: nxi array of accuracy, where n - number of curves to compare (usually train vs 		validation) and i - number of iterations for the plot
+
+	metadata: Array of n strings - what kind of data is present (usually "Train", "Validation")
+    """
+    plot_a_curve(loss, metadata, "Loss")
+    plot_a_curve(iou, metadata, "IOU")
+    plot_a_curve(accuracy, metadata, "Accuracy")
+
+def plot_a_curve(data, metadata, curve_type):
+    """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and 		corresponsding metadata
+
+    Args:
+        loss: array of losses, where n - number of curves to compare (usually train vs 			validation) and i - number of iterations for the plot
+
+	metadata: What kind of data is present (usually train, validation)
+
+	curve_type: (Loss, IOU, Accuracy)
+    """
+    title = ""
+    plt.title("Train vs Validation Error")
+    n = len(data[0]) # number of epochs
+    for i in range(len(metadata)):
+      if i != 0:
+        title += " vs "
+      title += metadata[i]
+      plt.plot(range(1,n+1), data[i], label=metadata[i])
+    title = title + " " + curve_type
+    plt.title(title)
+    plt.xlabel("Epoch")
+    plt.ylabel(curve_type)
+    plt.legend(loc='best')
     plt.show()
