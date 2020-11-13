@@ -36,11 +36,11 @@ class Metric:
     # takes Height x Width x Length tensor filled with 0/1
     def get_iou_per_object(self, pred, labels):
         # gets intersection over union for a signle object
-        pred = pred.squeeze(1)
-        labels = labels.squeeze(1)
+        # pred = pred.squeeze(1)
+        # labels = labels.squeeze(1)
         intersection = np.logical_and(labels, pred)
         union = np.logical_or(labels, pred)
-        iou = torch.sum(intersection) / torch.sum(union)
+        iou = torch.sum(intersection).item() / torch.sum(union).item()
         return iou
 
     # takes Batch x Height x Width x Length tensor/array filled with 0/1

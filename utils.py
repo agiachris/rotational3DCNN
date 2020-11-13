@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from collections import Counter
 from models import UNet3dBaseline
+from dataset.visualization import generate_curve
 
 
 def get_config(path, config_file):
@@ -18,7 +19,7 @@ def get_model(config):
     """Return the model specified in the configuration object
     """
     if config['model'] == "baseline":
-        return UNet3dBaseline.UNet3dBaseline()
+        return UNet3dBaseline.UNet3dBaseline(1, 1, 8)
 
 
 def get_model_name(config, epoch):
@@ -48,6 +49,7 @@ class MetricTracker:
         :param save_path: Path to save final results
         :param name: Identifier for the data split (e.g. 'train', 'val', 'test')
         """
+        self.name = name
         self.save_path = os.path.join(save_path, name)
         self.acc = np.zeros(config["num_epochs"])
         self.iou = np.zeros(config["num_epochs"])

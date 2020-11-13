@@ -2,13 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 #input: 1x3x128x128x128 tensor, declare UNet with input channel of 3
-#convolution  
+#convolution
 def conv_block_3d(in_dim, out_dim, activation):
     return nn.Sequential(
         nn.Conv3d(in_dim, out_dim, kernel_size=3, stride=1, padding=1),
         nn.BatchNorm3d(out_dim),
         activation,)
+
 
 #transpose convolution
 def conv_trans_block_3d(in_dim, out_dim, activation):
@@ -16,9 +18,11 @@ def conv_trans_block_3d(in_dim, out_dim, activation):
         nn.ConvTranspose3d(in_dim, out_dim, kernel_size=3, stride=2, padding=1, output_padding=1),
         nn.BatchNorm3d(out_dim),
         activation,)
+
 #pooling
 def max_pooling_3d():
     return nn.MaxPool3d(kernel_size=2, stride=2, padding=0)
+
 
 class UNet3dBaseline(nn.Module):
     def __init__(self, in_dim, out_dim, num_filters):
@@ -37,7 +41,7 @@ class UNet3dBaseline(nn.Module):
         self.down_4 = conv_block_3d(self.num_filters * 4, self.num_filters * 8, activation)
         
         # Bridge
-        self.bridge = conv_block_3d(self.num_filters * 16, self.num_filters * 32, activation)
+        self.bridge = conv_block_3d(self.num_filters * 8, self.num_filters * 16, activation)
         
         # Up sampling
         self.trans_2 = conv_trans_block_3d(self.num_filters * 16, self.num_filters * 16, activation)
@@ -50,8 +54,8 @@ class UNet3dBaseline(nn.Module):
         self.up_5 = conv_block_3d(self.num_filters * 3, self.num_filters * 1, activation)
         
         # Output
-        self.out = conv_block_3d(self.num_filters, out_dim, activation)
-    
+        self.out = nn.Conv3d(self.num_filters, out_dim, kernel_size=1)
+
     def forward(self, x):
         # Down
         down_1 = self.down_1(x) # shape [1, 4, 128, 128, 128]

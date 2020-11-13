@@ -47,7 +47,7 @@ class ShapeNet(Dataset):
                 sample_count += 1
 
         assert (len(samples) == sample_count)
-        self.samples = samples
+        self.samples = samples[:50]
 
     def __len__(self):
         return len(self.samples)
