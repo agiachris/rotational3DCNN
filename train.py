@@ -46,12 +46,12 @@ class Trainer:
         os.mkdir(self.model_path)
 
         # Model - build in pre-trained load
-        # model = get_model(config)
-        # self.model = model
+        model = get_model(config)
+        self.model = model
 
         # Loss, Optimizer
         self.criterion = nn.BCEWithLogitsLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(),
+        self.optimizer = torch.optim.Adam(self.model.parameters(),
                                           lr=float(config['lr']),
                                           weight_decay=float(config['dr']))
         
@@ -61,6 +61,7 @@ class Trainer:
         self.train_loader = DataLoader(self.train_set, batch_size=config['batch_size'],
                                        shuffle=True, num_workers=1, drop_last=False)
         self.val_loader = DataLoader(self.val_set, batch_size=config['batch_size'],
+                                     shuffle=True, num_workers=1, drop_last=False)
         
         # Metrics
         self.metrics = Metric()
@@ -100,7 +101,7 @@ class Trainer:
         """Training and evaluation loop for a given epoch.
         """
         # run a training epoch
-        for i, sample in enumerate(self.loader, 0):
+        for i, sample in enumerate(self.train_loader, 0):
             inputs = sample['inputs']
             targets = sample['targets']
 
@@ -117,12 +118,9 @@ class Trainer:
             acc, iou = self.get_metrics(preds.detach().squeeze(1), targets.detach().squeeze(1))
             self.train_metrics.store(acc, iou, loss.item())
 
-            if i % 10 == 0:
-                print("batch {} of {}".format(i, len(self.loader)))
-
         # run an evaluation epoch
         self.model.eval()
-        for i, sample in enumerate(self.loader, 0):
+        for i, sample in enumerate(self.val_loader, 0):
             inputs = sample['inputs']
             targets = sample['targets']
 
@@ -133,9 +131,6 @@ class Trainer:
             # track accuracy, IoU, and loss
             acc, iou = self.get_metrics(preds.detach().squeeze(1), targets.detach().squeeze(1))
             self.val_metrics.store(acc, iou, loss.item())
-
-            if i % 10 == 0:
-                print("batch {} of {}".format(i, len(self.loader)))
 
         self.model.train()
 

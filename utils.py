@@ -19,7 +19,8 @@ def get_model(config):
     """Return the model specified in the configuration object
     """
     if config['model'] == "baseline":
-        return UNet3dBaseline.UNet3dBaseline(1, 1, 8)
+        num_filters = int(config['num_filters'])
+        return UNet3dBaseline.UNet3dBaseline(1, 1, num_filters)
 
 
 def get_model_name(config, epoch):

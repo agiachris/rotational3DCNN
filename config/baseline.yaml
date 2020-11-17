@@ -1,0 +1,16 @@
+# hyper-parameters
+batch_size: 2
+lr: 1e-4
+dr: 5e-4
+num_epochs: 10
+
+# model
+model: baseline
+num_filters: 16
+
+# experiment
+exp_dir: exp
+exp_name: baseline_test
+
+# dataset
+data_path: data

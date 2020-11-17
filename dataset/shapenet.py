@@ -39,12 +39,12 @@ class ShapeNet(Dataset):
 
         # get sdf input
         input_tensor = tensor_from_file(input_file)
-        input_tensor[~np.isfinite(input_tensor)] = 0.0
+        input_tensor[~np.isfinite(input_tensor).astype(np.bool)] = 0.0
         input_tensor = torch.from_numpy(input_tensor).unsqueeze(0)
 
         # get df target
         target_tensor = tensor_from_file(target_file)
-        input_tensor[~np.isfinite(input_tensor)] = 0.0
+        target_tensor[~np.isfinite(target_tensor).astype(np.bool)] = 0.0
         target_tensor = torch.from_numpy(target_tensor).unsqueeze(0)
 
         out = dict()
