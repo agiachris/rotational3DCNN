@@ -1,5 +1,5 @@
-import numpy as np
 import torch
+import numpy as np
 
 '''
 example usage 
@@ -13,10 +13,18 @@ print(metric.get_iou_per_batch(data_tensor, label_tensor))
 print(metric.get_accuracy_per_batch(data_tensor, label_tensor))
 '''
 
+
 class Metric:
+
+    def __init__(self, config):
+        """Metric computation class capable of computing IoU scores, accuracy scores, and l2-distance
+         scores for a batch of signed-distance field and distance field input-label pairs.
+        """
+        self.batch_size = int(config['batch_size'])
+
     # takes Height x Width x Length tensor filled with 0/1
     def get_accuracy_per_object(self, pred, labels):
-        # gets voxel-wise accuracy a signle object
+        # gets voxel-wise accuracy a single object
         correctness = torch.eq(pred, labels)
         accuracy = torch.sum(correctness).item() / pred.nelement()
         return accuracy
@@ -35,9 +43,7 @@ class Metric:
 
     # takes Height x Width x Length tensor filled with 0/1
     def get_iou_per_object(self, pred, labels):
-        # gets intersection over union for a signle object
-        # pred = pred.squeeze(1)
-        # labels = labels.squeeze(1)
+        # gets intersection over union for a single object
         intersection = np.logical_and(labels, pred)
         union = np.logical_or(labels, pred)
         iou = torch.sum(intersection).item() / torch.sum(union).item()
@@ -54,3 +60,11 @@ class Metric:
         # gets intersection over union for all data
         iou = [self.get_iou_per_batch(pred[i], labels[i]) for i in range(len(pred))]
         return np.array(iou).mean()
+
+    def l2_norm(self, pred, labels):
+        """Compute the L2 norm between predictions and labels
+        """
+        pred = pred.reshape(self.batch_size, -1)
+        labels = labels.reshape(self.batch_size, -1)
+        assert (pred.size() == labels.size())
+        return torch.norm(pred - labels) / pred.nelement()

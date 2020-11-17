@@ -105,11 +105,14 @@ def plot_curves(loss, iou, accuracy, metadata):
     """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponsding metadata
 
     Args:
-        loss: nxi array of losses, where n - number of curves to compare (usually train vs validation) and i - number of iterations for the plot
+        loss: nxi array of losses, where n - number of curves to compare (usually train vs validation) and i -
+              number of iterations for the plot
 
-        iou: nxi array of intersection over union values, where n - number of curves to compare (usually train vs validation) and i - number of iterations for the plot
+        iou: nxi array of intersection over union values, where n - number of curves to compare
+             (usually train vs validation) and i - number of iterations for the plot
 
-        accuracy: nxi array of accuracy, where n - number of curves to compare (usually train vs validation) and i - number of iterations for the plot
+        accuracy: nxi array of accuracy, where n - number of curves to compare (usually train vs validation) and i -
+                  number of iterations for the plot
 
 	metadata: Array of n strings - what kind of data is present (usually "Train", "Validation")
     """
@@ -119,13 +122,9 @@ def plot_curves(loss, iou, accuracy, metadata):
 
 
 def plot_a_curve(data, metadata, curve_type):
-    """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponsding metadata
-
-    Args:
-        loss: array of losses, where n - number of curves to compare (usually train vs validation) and i - number of iterations for the plot
+    """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponding metadata.
 
 	metadata: What kind of data is present (usually train, validation)
-
 	curve_type: (Loss, IOU, Accuracy)
     """
     title = ""
@@ -147,16 +146,13 @@ def plot_a_curve(data, metadata, curve_type):
 def generate_curve(data, metadata, curve_type, save_path):
     """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponsding metadata
 
-    Args:
-        loss: array of losses, where n - number of curves to compare (usually train vs validation) and i - number of iterations for the plot
-
     metadata: What kind of data is present (usually train, validation)
-
     curve_type: (Loss, IOU, Accuracy)
     """
     title = ""
 
     # plot trajectories
+    plt.figure()
     num_epochs = len(data[0])
     for i in range(len(metadata)):
         if i != 0:

@@ -52,8 +52,9 @@ class MetricTracker:
         """
         self.name = name
         self.save_path = os.path.join(save_path, name)
-        self.acc = np.zeros(config["num_epochs"])
+        self.l2 = np.zeros(config['num_epochs'])
         self.iou = np.zeros(config["num_epochs"])
+        self.acc = np.zeros(config["num_epochs"])
         self.loss = np.zeros(config["num_epochs"])
         self.tracker = Counter()
         self.idx = 0
@@ -65,19 +66,30 @@ class MetricTracker:
         total_epoch = self.tracker["i"]
         for metric in self.tracker.keys():
             self.tracker[metric] /= total_epoch
-        self.acc[self.idx] = self.tracker["acc"]
+        self.l2[self.idx] = self.tracker["l2"]
         self.iou[self.idx] = self.tracker["iou"]
+        self.acc[self.idx] = self.tracker["acc"]
         self.loss[self.idx] = self.tracker["loss"]
         self.reset()
         self.idx += 1
 
-    def store(self, acc, iou, loss):
+    def store(self, l2, iou, acc, loss):
         """Store metrics for a given batch.
         """
         self.tracker["i"] += 1
-        self.tracker["acc"] += acc
+        self.tracker["l2"] += l2
         self.tracker["iou"] += iou
+        self.tracker["acc"] += acc
         self.tracker["loss"] += loss
+
+    def get_latest(self):
+        """Return the most recent performance metrics
+        """
+        l2 = self.l2[self.idx-1]
+        iou = self.iou[self.idx-1]
+        acc = self.acc[self.idx-1]
+        loss = self.loss[self.idx-1]
+        return l2, iou, acc, loss
 
     def reset(self):
         """Reset tracker for a new epoch.
@@ -87,6 +99,7 @@ class MetricTracker:
     def save(self):
         """Save metrics over the entire session.
         """
-        np.savetxt(self.save_path + "_acc", self.acc)
+        np.savetxt(self.save_path + '_l2', self.l2)
         np.savetxt(self.save_path + "_iou", self.iou)
+        np.savetxt(self.save_path + "_acc", self.acc)
         np.savetxt(self.save_path + "_loss", self.loss)

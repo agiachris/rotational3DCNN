@@ -1,6 +1,6 @@
 # hyper-parameters
 batch_size: 2
-lr: 1e-4
+lr: 1e-3
 dr: 5e-4
 num_epochs: 10
 
