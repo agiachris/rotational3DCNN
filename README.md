@@ -8,6 +8,7 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 - [x] Configuration files (Chris)
 - [x] Configurable training framework, trainer.py (Chris) 
 - [x] ShapeNet dataset, dataset/shapenet.py (Chris)
+- [x] Partition dataset into independent splits (Chris)
 - [x] Baseline PyTorch model (YiFei)
 - [x] 3D tensor metric computations (Polina)
 - [x] 3D tensor visualization (Polina)
@@ -15,7 +16,6 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 - [x] Metric tracker and plotting (Chris & Polina)
 
 ### Open Tasks
-- [ ] Partition dataset into independent splits (Chris)
 - [ ] Evaluator class for model evaluation (YiFei)
 - [ ] Visualization class (Polina)
 - [ ] Integrate visualization class with Evaluater class (YiFei)
@@ -23,4 +23,5 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 - [ ] Design variations of the baseline model (Team)
 
 ### Deployment
+- [ ] GPU server deployment (Glen)
 

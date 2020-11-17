@@ -1,4 +1,5 @@
 import os
+import csv
 import torch
 from dataset.data_utils import *
 from torch.utils.data import Dataset
@@ -6,7 +7,7 @@ from torch.utils.data import Dataset
 
 class ShapeNet(Dataset):
 
-    def __init__(self, config):
+    def __init__(self, config, config_path, split):
         """
         Load ShapeNet data of scanned partial models and the corresponding distance
         transforms of the complete models.
@@ -19,34 +20,15 @@ class ShapeNet(Dataset):
         inputs_path = osj(data_path, 'shapenet_dim32_sdf')
         targets_path = osj(data_path, 'shapenet_dim32_df')
 
-        # group files according the class_id
-        input_files = {}
-        target_files = {}
-        for class_id in os.listdir(inputs_path):
-            # input class_id files
-            input_class_path = osj(inputs_path, class_id)
-            input_files[class_id] = [osj(input_class_path, sdf_file) for sdf_file in os.listdir(input_class_path)]
-            # target class_id files
-            target_class_path = osj(targets_path, class_id)
-            target_files[class_id] = [osj(target_class_path, df_file) for df_file in os.listdir(target_class_path)]
+        samples = list()
+        csv_file = osj(config_path, split + '.csv')
+        with open(csv_file, 'r') as csvfile:
+            csv_reader = csv.reader(csvfile, delimiter=',')
+            for row in csv_reader:
+                sdf_file = osj(inputs_path, row[0])
+                df_file = osj(targets_path, row[1])
+                samples.append((sdf_file, df_file))
 
-        # determine input .sdf and target .df sample pairs
-        sample_count = 0
-        samples = []
-        for class_id in input_files:
-            for sdf_path in input_files[class_id]:
-                # get model_id of input .sdf file
-                _, sdf_file = os.path.split(sdf_path)
-                model_id = os.path.splitext(sdf_file)[0].split('__')[0]
-
-                # ensure .df target file exists for desired model_id
-                df_file = osj(targets_path, class_id, model_id + '__0__.df')
-                if df_file in target_files[class_id]:
-                    samples.append((sdf_path, df_file))
-
-                sample_count += 1
-
-        assert (len(samples) == sample_count)
         self.samples = samples
 
     def __len__(self):
@@ -57,10 +39,12 @@ class ShapeNet(Dataset):
 
         # get sdf input
         input_tensor = tensor_from_file(input_file)
+        input_tensor[~np.isfinite(input_tensor)] = 0.0
         input_tensor = torch.from_numpy(input_tensor).unsqueeze(0)
 
         # get df target
         target_tensor = tensor_from_file(target_file)
+        input_tensor[~np.isfinite(input_tensor)] = 0.0
         target_tensor = torch.from_numpy(target_tensor).unsqueeze(0)
 
         out = dict()
