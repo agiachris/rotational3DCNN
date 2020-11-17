@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from dataset.shapenet import ShapeNet
 from metric import Metric
 from utils import *
+from dataset.visualization import generate_curve
 
 
 class Trainer:
@@ -49,19 +50,18 @@ class Trainer:
         # self.model = model
 
         # Loss, Optimizer
-        # self.criterion = nn.BCEWithLogitsLoss()
-        # self.optimizer = torch.optim.Adam(model.parameters(),
-        #                                   lr=config['lr'],
-        #                                   weight_decay=config['dr'])
-
+        self.criterion = nn.BCEWithLogitsLoss()
+        self.optimizer = torch.optim.Adam(model.parameters(),
+                                          lr=float(config['lr']),
+                                          weight_decay=float(config['dr']))
+        
         # Dataset and DataLoader
         self.train_set = ShapeNet(config, config_path, 'train')
         self.val_set = ShapeNet(config, config_path, 'valid')
         self.train_loader = DataLoader(self.train_set, batch_size=config['batch_size'],
                                        shuffle=True, num_workers=1, drop_last=False)
         self.val_loader = DataLoader(self.val_set, batch_size=config['batch_size'],
-                                     shuffle=True, num_workers=1, drop_last=False)
-
+        
         # Metrics
         self.metrics = Metric()
         self.train_metrics = MetricTracker(config, self.exp_dir, "train")
@@ -73,7 +73,7 @@ class Trainer:
         metrics through training. Save the metrics once the training
         commences.
         """
-        for self.epoch in self.config['num_epochs']:
+        for self.epoch in range(int(self.config['num_epochs'])):
             # train and evaluate from an epoch
             self.run_epoch()
 
@@ -88,24 +88,64 @@ class Trainer:
         self.train_metrics.save()
         self.val_metrics.save()
 
+        # generate training / validation curves
+        generate_curve([self.train_metrics.iou, self.val_metrics.iou],
+                       ['Train', 'Valid'], 'IoU', self.exp_dir)
+        generate_curve([self.train_metrics.acc, self.val_metrics.acc],
+                       ['Train', 'Valid'], 'Acc', self.exp_dir)
+        generate_curve([self.train_metrics.loss, self.val_metrics.loss],
+                       ['Train', 'Valid'], 'Loss', self.exp_dir)
+
     def run_epoch(self):
         """Training and evaluation loop for a given epoch.
         """
         # run a training epoch
+        for i, sample in enumerate(self.loader, 0):
+            inputs = sample['inputs']
+            targets = sample['targets']
 
-        self.model.eval()
+            # make prediction and compute loss
+            preds = self.model(inputs)
+            loss = self.criterion(preds, targets)
+            loss.backward()
 
-        # store batch metrics with: self.train_metrics.store(acc, iou, loss)
+            # update parameters
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+
+            # track accuracy, IoU, and loss
+            acc, iou = self.get_metrics(preds.detach().squeeze(1), targets.detach().squeeze(1))
+            self.train_metrics.store(acc, iou, loss.item())
+
+            if i % 10 == 0:
+                print("batch {} of {}".format(i, len(self.loader)))
 
         # run an evaluation epoch
+        self.model.eval()
+        for i, sample in enumerate(self.loader, 0):
+            inputs = sample['inputs']
+            targets = sample['targets']
+
+            # make prediction and compute loss
+            preds = self.model(inputs)
+            loss = self.criterion(preds, targets)
+
+            # track accuracy, IoU, and loss
+            acc, iou = self.get_metrics(preds.detach().squeeze(1), targets.detach().squeeze(1))
+            self.val_metrics.store(acc, iou, loss.item())
+
+            if i % 10 == 0:
+                print("batch {} of {}".format(i, len(self.loader)))
 
         self.model.train()
 
-    def get_metrics(self, preds, labels):
+    def get_metrics(self, preds, targets):
         """Compute batch accuracy and IoU
         """
-        acc = self.metrics.get_accuracy_per_batch(preds, labels)
-        iou = self.metrics.get_iou_per_batch(preds, labels)
+        preds = (preds < 0.50).long()
+        targets = (targets < 0.50).long()
+        acc = self.metrics.get_accuracy_per_batch(preds, targets)
+        iou = self.metrics.get_iou_per_batch(preds, targets)
         return acc, iou
 
     def save_model(self):
