@@ -27,6 +27,7 @@ class Trainer:
         base_path = os.path.dirname(os.path.abspath(__file__))
         config = get_config(base_path, args.config)
         self.config = config
+        config_path = os.path.split(osj(base_path, args.config))[0]
 
         # create experiment, logging, and model checkpoint directories
         self.exp_dir = osj(osj(base_path, config['exp_dir']), config['exp_name'])
@@ -45,20 +46,22 @@ class Trainer:
         os.mkdir(self.model_path)
 
         # Model - build in pre-trained load
-        model = get_model(config)
-        self.model = model
+        # model = get_model(config)
+        # self.model = model
 
         # Loss, Optimizer
         self.criterion = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(model.parameters(),
                                           lr=float(config['lr']),
                                           weight_decay=float(config['dr']))
-
+        
         # Dataset and DataLoader
-        self.dataset = ShapeNet(config)
-        self.loader = DataLoader(self.dataset, batch_size=int(config['batch_size']),
-                                 shuffle=True, num_workers=1, drop_last=False)
-
+        self.train_set = ShapeNet(config, config_path, 'train')
+        self.val_set = ShapeNet(config, config_path, 'valid')
+        self.train_loader = DataLoader(self.train_set, batch_size=config['batch_size'],
+                                       shuffle=True, num_workers=1, drop_last=False)
+        self.val_loader = DataLoader(self.val_set, batch_size=config['batch_size'],
+        
         # Metrics
         self.metrics = Metric()
         self.train_metrics = MetricTracker(config, self.exp_dir, "train")
