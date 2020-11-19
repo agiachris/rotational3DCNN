@@ -14,14 +14,19 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 - [x] 3D tensor visualization (Polina)
 - [x] Training and evaluation loop (Glen)
 - [x] Metric tracker and plotting (Chris & Polina)
+- [x] Visualization class (Polina)
 
-### Open Tasks
+### Open Tasks 
 - [ ] Evaluator class for model evaluation (YiFei)
-- [ ] Visualization class (Polina)
-- [ ] Integrate visualization class with Evaluater class (YiFei)
+    - Create dataset flag in argparse
+- [ ] Integrate visualization into training / validation (Polina)
+    - Create parameters in yaml files for number of samples to visualize
 - [ ] Deploy starter code on GPU server (Glen)
+    - nvidia-smi --> gpuid flag, attempt training
 - [ ] Design variations of the baseline model (Team)
 
-### Deployment
-- [ ] GPU server deployment (Glen)
-
+Target deadline: Nov 23 am (Monday)
+### Schedule
+- Nov 23 (Monday, evening)
+- Nov 25 (Wednesday, usual)
+- Nov 27 (Friday, evening)

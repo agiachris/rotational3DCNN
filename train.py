@@ -46,9 +46,12 @@ class Trainer:
         os.mkdir(self.log_path)
         os.mkdir(self.model_path)
 
+        # Device
+        self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
+
         # Model - build in pre-trained load
         model = get_model(config)
-        self.model = model
+        self.model = model.to(self.device)
 
         # Loss, Optimizer
         self.criterion = nn.MSELoss()
@@ -106,8 +109,8 @@ class Trainer:
         # run a training epoch
         train_time = time.time()
         for i, sample in enumerate(self.train_loader, 0):
-            inputs = sample['inputs']
-            targets = sample['targets']
+            inputs = sample['inputs'].to(self.device)
+            targets = sample['targets'].to(self.device)
 
             # make prediction and compute loss
             preds = self.model(inputs)
@@ -119,24 +122,24 @@ class Trainer:
             self.optimizer.zero_grad()
 
             # track accuracy, IoU, and loss
-            l2, iou, acc = self.get_metrics(preds, targets)
-            self.train_metrics.store(l2, iou, acc, loss.item())
+            l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
+            self.train_metrics.store(l2, iou, acc, loss.detach().cpu().item())
         train_time = time.time() - train_time
 
         # run an evaluation epoch
         self.model.eval()
         val_time = time.time()
         for i, sample in enumerate(self.val_loader, 0):
-            inputs = sample['inputs']
-            targets = sample['targets']
+            inputs = sample['inputs'].to(self.device)
+            targets = sample['targets'].to(self.device)
 
             # make prediction and compute loss
             preds = self.model(inputs)
             loss = self.criterion(preds, targets)
 
             # track accuracy, IoU, and loss
-            l2, iou, acc = self.get_metrics(preds, targets)
-            self.val_metrics.store(l2, iou, acc, loss.item())
+            l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
+            self.val_metrics.store(l2, iou, acc, loss.detach().cpu().item())
         val_time = time.time() - val_time
         self.model.train()
 
@@ -181,6 +184,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training Configuration')
     parser.add_argument('--config', required=True, help='Path to configuration file')
     parser.add_argument('--pretrain', type=bool, default=False, help="Continue training a previous model")
+    parser.add_argument('--gpuid', type=str, default='cpu', help="Training device")
     args = parser.parse_args()
 
     # create trainer and start training
