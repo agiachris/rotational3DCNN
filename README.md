@@ -4,6 +4,10 @@
 
 This project aims to design a system capable of reconstructing 3-dimensional objects from a partially complete voxelized representation. Provided that the baseline task is completed with considerable results, we will investigate the effects of partial object rotation on the model’s performance, and attempt to design for a rotationally invariant reconstruction network.
 
+### How to use
+
+The training script expects two flags currently: python train.py --config config/path --gpuid gpuid_optional
+
 ### Completed Tasks
 - [x] Configuration files (Chris)
 - [x] Configurable training framework, trainer.py (Chris) 
@@ -26,7 +30,3 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 - [ ] Design variations of the baseline model (Team)
 
 Target deadline: Nov 23 am (Monday)
-### Schedule
-- Nov 23 (Monday, evening)
-- Nov 25 (Wednesday, usual)
-- Nov 27 (Friday, evening)
