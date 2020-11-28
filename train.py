@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from dataset.shapenet import ShapeNet
 from metric import Metric
 from utils import *
-from dataset.visualization import generate_curve
+from dataset.visualization import *
 
 
 class Trainer:
@@ -88,6 +88,7 @@ class Trainer:
             self.run_epoch()
             # save model checkpoint
             self.save_model()
+            generate_airplane_voxel_image(self.model, self.epoch, self.exp_dir)
 
         # save scores across epochs
         self.train_metrics.save()

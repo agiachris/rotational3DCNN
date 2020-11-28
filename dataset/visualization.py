@@ -6,6 +6,13 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
 
 
+from utils import *
+from torch.utils.data import DataLoader
+import torch
+from dataset.data_utils import *
+from torch.utils.data import Dataset
+
+
 def visualize_df(tensor):
     """Basic 3D visualization for a distance field tensor.
 
@@ -99,6 +106,53 @@ def show():
     """ Shows all constructed figures. Mainly for visualizing multiple 3D figures at once
     """
     plt.show()
+
+
+def generate_airplane_voxel_image(model, epoch, save_path):
+    """ DF 3D tensor """
+
+    input_file = "data/sample_airplane/sample_airplane.sdf"
+    input_tensor = tensor_from_file(input_file)
+    input_tensor[~np.isfinite(input_tensor).astype(np.bool)] = 0.0
+    input_tensor = torch.from_numpy(input_tensor).unsqueeze(0).unsqueeze(0)
+    tensor = model(input_tensor).detach().cpu().numpy()
+    tensor = tensor.squeeze(0).squeeze(0)
+
+    if len(tensor.shape) == 4:
+        tensor = np.squeeze(tensor, 0)
+
+    volume = np.less_equal(tensor, 0.5)
+    volumeTransposed = np.transpose(volume, (2, 0, 1))
+
+    fig = plt.figure("Sample airplane predicted object")
+    ax = fig.add_subplot(111, projection='3d')
+    ax.voxels(volumeTransposed)
+
+    # label figure
+    plt.title("Sample airplane predicted object")
+
+    save_path = os.path.join(save_path, '_sample_airplane_' + str(epoch) + '.png')
+    plt.savefig(save_path)
+
+
+def generate_voxel_image(model, tensor, tensor_idx, save_path):
+    """ DF 3D tensor """
+
+    if len(tensor.shape) == 4:
+        tensor = np.squeeze(tensor, 0)
+
+    volume = np.less_equal(tensor, 0.5)
+    volumeTransposed = np.transpose(volume, (2, 0, 1))
+
+    fig = plt.figure("Predicted output nr" + str(tensor_idx))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.voxels(volumeTransposed)
+
+    # label figure
+    plt.title("Predicted output nr" + str(tensor_idx))
+
+    save_path = os.path.join(save_path, '_output_' + str(tensor_idx) + '.png')
+    plt.savefig(save_path)
 
 
 def plot_curves(loss, iou, accuracy, metadata):
