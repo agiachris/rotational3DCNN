@@ -108,14 +108,14 @@ def show():
     plt.show()
 
 
-def generate_airplane_voxel_image(model, epoch, save_path):
+def generate_airplane_voxel_image(model, epoch, save_path, device):
     """ DF 3D tensor """
 
     input_file = "data/sample_airplane/sample_airplane.sdf"
     input_tensor = tensor_from_file(input_file)
     input_tensor[~np.isfinite(input_tensor).astype(np.bool)] = 0.0
     input_tensor = torch.from_numpy(input_tensor).unsqueeze(0).unsqueeze(0)
-    tensor = model(input_tensor).detach().cpu().numpy()
+    tensor = model(input_tensor.to(device)).detach().cpu().numpy()
     tensor = tensor.squeeze(0).squeeze(0)
 
     if len(tensor.shape) == 4:

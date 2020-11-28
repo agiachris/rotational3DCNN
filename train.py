@@ -34,6 +34,7 @@ class Trainer:
         self.exp_dir = osj(osj(base_path, config['exp_dir']), config['exp_name'])
         self.log_path = osj(self.exp_dir, "logs")
         self.model_path = osj(self.exp_dir, "checkpoints")
+        self.visual_path = osj(self.exp_dir, "visuals")
         if os.path.exists(self.exp_dir):
             print("Error: This experiment already exists")
             print("Cancel Session:    0")
@@ -45,6 +46,7 @@ class Trainer:
         os.mkdir(self.exp_dir)
         os.mkdir(self.log_path)
         os.mkdir(self.model_path)
+        os.mkdir(self.visual_path)
 
         # Device
         self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
@@ -88,7 +90,7 @@ class Trainer:
             self.run_epoch()
             # save model checkpoint
             self.save_model()
-            generate_airplane_voxel_image(self.model, self.epoch, self.exp_dir)
+            generate_airplane_voxel_image(self.model, self.epoch, self.visual_path, self.device)
 
         # save scores across epochs
         self.train_metrics.save()
@@ -152,7 +154,7 @@ class Trainer:
         train_l2, train_iou, train_acc, train_loss = self.train_metrics.get_latest()
         val_l2, val_iou, val_acc, val_loss = self.val_metrics.get_latest()
         print(("epoch: {}/{}  |  t_l2: {:.3f}  |  t_iou: {:.3f}  |  t_acc: {:.3f}  |  t_loss: {:.3f}  |  " +
-              "v_l2: {:.3f}  |  v_iou: {:.3f}  |  v_acc: {:.3f}  |  val_loss: {:.3f}  |  samples/sec: {:.2f}").
+              "v_l2: {:.3f}  |  v_iou: {:.3f}  |  v_acc: {:.3f}  |  val_loss: {:.3f}  |  sec/sample: {:.2f}").
               format(self.epoch, self.config['num_epochs'], train_l2, train_iou, train_acc,
                      train_loss, val_l2, val_iou, val_acc, val_loss, ss))
 
