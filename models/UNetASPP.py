@@ -2,6 +2,36 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class ASPPModule(nn.ModuleList):
+    def __init__(self, dilations, in_channels, channels, conv_cfg, norm_cfg,
+                 act_cfg):
+        super(ASPPModule, self).__init__()
+        self.dilations = dilations
+        self.in_channels = in_channels
+        self.channels = channels
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
+        for dilation in dilations:
+            self.append(
+                ConvModule(
+                    self.in_channels,
+                    self.channels,
+                    1 if dilation == 1 else 3,
+                    dilation=dilation,
+                    padding=0 if dilation == 1 else dilation,
+                    conv_cfg=self.conv_cfg,
+                    norm_cfg=self.norm_cfg,
+                    act_cfg=self.act_cfg))
+
+    def forward(self, x):
+        """Forward function."""
+        aspp_outs = []
+        for aspp_module in self:
+            aspp_outs.append(aspp_module(x))
+
+        return aspp_outs
+
 
 # input: 1x3x128x128x128 tensor, declare UNet with input channel of 3
 # convolution
