@@ -1,0 +1,15 @@
+# hyper-parameters
+batch_size: 2
+lr: 1e-3
+dr: 5e-4
+num_epochs: 10
+
+# model
+model: residual_unet
+
+# experiment
+exp_dir: exp
+exp_name: residual_unet
+
+# dataset
+data_path: data
