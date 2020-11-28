@@ -29,7 +29,7 @@ class ShapeNet(Dataset):
                 df_file = osj(targets_path, row[1])
                 samples.append((sdf_file, df_file))
 
-        self.samples = samples
+        self.samples = samples[:10]
 
     def __len__(self):
         return len(self.samples)

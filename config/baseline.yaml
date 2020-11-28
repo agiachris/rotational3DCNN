@@ -2,7 +2,7 @@
 batch_size: 32
 lr: 1e-3
 dr: 5e-4
-num_epochs: 10
+num_epochs: 5
 
 # model
 model: baseline
