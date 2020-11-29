@@ -1,4 +1,5 @@
 import os
+import time
 import shutil
 import argparse
 import torch
@@ -14,8 +15,9 @@ class Evaluater:
 
     def __init__(self, args):
         """
-        Create Trainer object to which handles the training and evaluation of a specified model,
-        the tracking of computed metrics, and saving of results / checkpoints.
+        Create Evaluator object which handles the evaluation of a specified model,
+        the tracking of computed metrics, and saves the evaluation metrics within the 
+        pre-existing experiment directory.
         :param args: ArgParse object which holds the path the experiment configuration file along
                      with other key experiment options.
         """
@@ -25,51 +27,82 @@ class Evaluater:
         base_path = os.path.dirname(os.path.abspath(__file__))
         config = get_config(base_path, args.config)
         self.config = config
-        config_path = os.path.split(osj(base_path, args.config))[0]
+        config_path = osj(base_path, 'config')
 
-        # Model - build in pre-trained load
+        # Device
+        self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
+
+        # Model - load pre-trained
         model = get_model(config)
         self.model = model
+        self.load_model(args.model)
+        self.model.to(self.device)
 
-        # Loss, Optimizer
-        self.criterion = nn.BCEWithLogitsLoss()
+        # Loss metric
+        self.criterion = nn.MSELoss()
 
         # Dataset and DataLoader
-        self.dataset = ShapeNet(config, config_path, args.type)
-
+        self.dataset = ShapeNet(config, config_path, args.data)
         self.loader = DataLoader(self.dataset, batch_size=config['batch_size'],
                                  shuffle=True, num_workers=1, drop_last=False)
+
+        print("Commencing evaluation with {} model on {} split".format(config['model'], args.data))
 
         # Metrics
         self.metrics = Metric(config)
         self.epoch = 0
 
+
     def eval(self):
-        for i, sample in enumerate(self.loader, 0):
-            inputs = sample['inputs']
-            targets = sample['targets']
-            out = self.model(inputs)
-            loss = self.criterion(out, targets) # compute the loss
-            acc, iou = self.get_metrics(out.detach().squeeze(1), targets.detach().squeeze(1))
+        self.model.eval()
+        val_time = time.time()
+        for i, sample in enumerate(self.val_loader, 0):
+            inputs = sample['inputs'].to(self.device)
+            targets = sample['targets'].to(self.device)
 
-            if i % 10 == 0:
-                print("batch {} of {}".format(i, len(self.loader)))            
-                print("Accuracy:",acc,"IOU:",iou,"Loss:",loss)
+            # make prediction and compute loss
+            preds = self.model(inputs)
+            loss = self.criterion(preds, targets)
 
-    def get_metrics(self, preds, labels):
+            # track accuracy, IoU, and loss
+            l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
+            self.metrics.store(l2, iou, acc, loss.detach().cpu().item())
+
+        # average metrics over epoch
+        ss = (time.time() - val_time) / (self.dataset.__len__())
+        self.metrics.store_epoch()
+        l2, iou, acc, loss = self.metrics.get_latest()
+        print("Evaluation results - l2: {:.3f}  |  iou: {:.3f}  |  acc: {:.3f}  |  loss: {:.3f} |   sec/sample: {:.2f}"
+            .format(l2, iou, acc, loss, ss))
+
+    def get_metrics(self, preds, targets):
         """Compute batch accuracy and IoU
         """
-        acc = self.metrics.get_accuracy_per_batch(preds, labels)
-        iou = self.metrics.get_iou_per_batch(preds, labels)
-        return acc, iou
+        # compute L2 from DF
+        preds = preds.detach().squeeze(1)
+        targets = targets.detach().squeeze(1)
+        l2 = self.metrics.l2_norm(preds, targets)
+
+        # compute IoU and acc from thresholded Df
+        preds = (preds < 0.50).long()
+        targets = (targets < 0.50).long()
+        iou = self.metrics.get_iou_per_batch(preds, targets)
+        acc = self.metrics.get_accuracy_per_batch(preds, targets)
+        return l2, iou, acc
+
+    def load_model(self, model_path):
+        """Load state dictionary of model
+        """
+
 
 
 if __name__ == '__main__':
     # parse CLI inputs
     parser = argparse.ArgumentParser(description='Training Configuration')
     parser.add_argument('--config', required=True, help='Path to configuration file')
-    parser.add_argument('--type', required=True, help='Specify whether we are evaluating training or validation data')
-
+    parser.add_argument('--model', required=True, help='Model version to evaluate')
+    parser.add_argument('--data', required=True, help='Data split to evaluate the model on')
+    parser.add_argument('--gpuid', type=str, default='cpu', help="Training device")
     args = parser.parse_args()
 
     # create trainer and start training

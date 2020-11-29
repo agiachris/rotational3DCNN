@@ -15,6 +15,14 @@ def get_config(path, config_file):
     return config
 
 
+def save_config(path, config):
+    """Save YAML configuration file
+    """
+    path = os.path.join(path, 'config.yaml')
+    with open(path, 'w') as config_stream:
+        yaml.dump(config, config_stream)
+
+
 def get_model(config):
     """Return the model specified in the configuration object
     """

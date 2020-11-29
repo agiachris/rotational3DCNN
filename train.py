@@ -48,6 +48,9 @@ class Trainer:
         os.mkdir(self.model_path)
         os.mkdir(self.visual_path)
 
+        # save configuration file
+        save_config(self.exp_dir, config)
+
         # Device
         self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
 

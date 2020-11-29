@@ -6,7 +6,15 @@ This project aims to design a system capable of reconstructing 3-dimensional obj
 
 ### How to use
 
-The training script expects two flags currently: python train.py --config config/path --gpuid gpuid_optional
+The training script expects two flags currently:
+```python
+python train.py --config config/path --gpuid gpuid_optional 
+```
+
+To evaluate a pre-trained model on a specific set:
+```python
+python evaluate.py --config config/path --model path/to/model --data data_split --gpuid gpuid_optional
+```
 
 ### Completed Tasks
 - [x] Configuration files (Chris)
@@ -19,14 +27,10 @@ The training script expects two flags currently: python train.py --config config
 - [x] Training and evaluation loop (Glen)
 - [x] Metric tracker and plotting (Chris & Polina)
 - [x] Visualization class (Polina)
+- [x] Evalutor class for model evaluation (YiFei & Chris)
+- [x] Integrate visualization into training / validation (Polina)
+
 
 ### Open Tasks 
-- [ ] Evaluator class for model evaluation (YiFei)
-    - Create dataset flag in argparse
-- [ ] Integrate visualization into training / validation (Polina)
-    - Create parameters in yaml files for number of samples to visualize
-- [ ] Deploy starter code on GPU server (Glen)
-    - nvidia-smi --> gpuid flag, attempt training
 - [ ] Design variations of the baseline model (Team)
-
-Target deadline: Nov 23 am (Monday)
+	- Model should also attempt to classify the model type as a prior for reconstruction
