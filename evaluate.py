@@ -9,15 +9,16 @@ from torch.utils.data import DataLoader
 from dataset.shapenet import ShapeNet
 from metric import Metric
 from utils import *
+from dataset.visualization import *
 
 
-class Evaluater:
+class Evaluator:
 
     def __init__(self, args):
         """
         Create Evaluator object which handles the evaluation of a specified model,
-        the tracking of computed metrics, and saves the evaluation metrics within the 
-        pre-existing experiment directory.
+        the tracking of computed metrics, and saving of results.
+
         :param args: ArgParse object which holds the path the experiment configuration file along
                      with other key experiment options.
         """
@@ -28,6 +29,20 @@ class Evaluater:
         config = get_config(base_path, args.config)
         self.config = config
         config_path = osj(base_path, 'config')
+
+        # create experiment, logging, and model checkpoint directories
+        self.eval_dir = osj(osj(base_path, config['eval_dir']), config['eval_name'])
+        self.visual_path = osj(self.eval_dir, "visuals")
+        if os.path.exists(self.eval_dir):
+            print("Error: This evaluation already exists")
+            print("Cancel Session:    0")
+            print("Overwrite:         1")
+            if input() == str(1):
+                shutil.rmtree(self.exp_dir)
+            else:
+                exit(1)
+        os.mkdir(self.eval_dir)
+        os.mkdir(self.visual_path)
 
         # Device
         self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
@@ -42,7 +57,8 @@ class Evaluater:
         self.criterion = nn.MSELoss()
 
         # Dataset and DataLoader
-        self.dataset = ShapeNet(config, config_path, args.data)
+        self.dataset = ShapeNet(config, config_path, args.type)
+        self.tracked_samples = extract_categories(self.dataset.samples, 3)
         self.loader = DataLoader(self.dataset, batch_size=config['batch_size'],
                                  shuffle=True, num_workers=1, drop_last=False)
 
@@ -67,6 +83,14 @@ class Evaluater:
             # track accuracy, IoU, and loss
             l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
             self.metric_tracker.store(l2, iou, acc, loss.detach().cpu().item())
+
+            if i % 10 == 0:
+                print("batch {} of {}".format(i, len(self.loader)))            
+                print("Accuracy:",acc,"IOU:",iou,"Loss:",loss)
+            for item_class, item_list in self.tracked_samples.items():
+                for i, pair in enumerate(item_list):
+                    generate_original_voxel_image(pair[1], i, class_mapping[str(item_class)], self.visual_path)
+                    generate_voxel_image_from_model(self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
 
         # average metrics over epoch
         ss = (time.time() - val_time) / (self.dataset.__len__())
@@ -106,6 +130,6 @@ if __name__ == '__main__':
     parser.add_argument('--gpuid', type=str, default='cpu', help="Training device")
     args = parser.parse_args()
 
-    # create trainer and start training
-    evaluate = Evaluater(args)
+    # create evaluator and start evaluating
+    evaluate = Evaluator(args)
     evaluate.eval()
