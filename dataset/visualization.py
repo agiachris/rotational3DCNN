@@ -135,7 +135,7 @@ def generate_airplane_voxel_image(model, epoch, save_path, device):
     plt.savefig(save_path)
 
 
-def generate_voxel_image_from_model(model, tensor_path, idx, tensor_class, epoch, save_path, device):
+def generate_voxel_image_from_model(dataset_type, model, tensor_path, idx, tensor_class, epoch, save_path, device):
     """ DF 3D tensor """
 
     input_file = tensor_path
@@ -151,17 +151,17 @@ def generate_voxel_image_from_model(model, tensor_path, idx, tensor_class, epoch
     volume = np.less_equal(tensor, 0.5)
     volumeTransposed = np.transpose(volume, (2, 0, 1))
 
-    fig = plt.figure("Predicted " + tensor_class + " " + str(idx))
+    fig = plt.figure(dataset_type + ": predicted " + tensor_class + " " + str(idx))
     ax = fig.add_subplot(111, projection='3d')
     ax.voxels(volumeTransposed)
 
     # label figure
-    plt.title("Predicted " + tensor_class + " " + str(idx))
+    plt.title(dataset_type + ": predicted " + tensor_class + " " + str(idx))
 
-    save_path = os.path.join(save_path, 'predicted_' + tensor_class + str(idx) + "_" + str(epoch) + '.png')
+    save_path = os.path.join(save_path, dataset_type + '_predicted_' + tensor_class + str(idx) + "_" + str(epoch) + '.png')
     plt.savefig(save_path)
 
-def generate_original_voxel_image(tensor_path, idx, tensor_class, save_path):
+def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, save_path):
     """ DF 3D tensor """
 
     target_tensor = tensor_from_file(tensor_path)
@@ -173,14 +173,14 @@ def generate_original_voxel_image(tensor_path, idx, tensor_class, save_path):
     volume = np.less_equal(tensor, 0.5)
     volumeTransposed = np.transpose(volume, (2, 0, 1))
 
-    fig = plt.figure("Target " + tensor_class + " " + str(idx))
+    fig = plt.figure(dataset_type + ": target " + tensor_class + " " + str(idx))
     ax = fig.add_subplot(111, projection='3d')
     ax.voxels(volumeTransposed)
 
     # label figure
-    plt.title("Target " + tensor_class + " " + str(idx))
+    plt.title(dataset_type + ": target " + tensor_class + " " + str(idx))
 
-    save_path = os.path.join(save_path, 'target_' + tensor_class + str(idx) + '.png')
+    save_path = os.path.join(save_path, dataset_type+ '_target_' + tensor_class + str(idx) + '.png')
     plt.savefig(save_path)
 
 def plot_curves(loss, iou, accuracy, metadata):
