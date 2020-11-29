@@ -64,7 +64,10 @@ class Trainer:
         # Dataset and DataLoader
         self.train_set = ShapeNet(config, config_path, 'train')
         self.val_set = ShapeNet(config, config_path, 'valid')
-        self.tracked_val_samples = extract_categories(self.val_set.samples, 3)
+
+        self.tracked_train_samples = extract_categories(self.train_set.samples, 2)
+        self.tracked_val_samples = extract_categories(self.val_set.samples, 2)
+
         self.train_loader = DataLoader(self.train_set, batch_size=config['batch_size'],
                                        shuffle=True, num_workers=1, drop_last=False)
         self.val_loader = DataLoader(self.val_set, batch_size=config['batch_size'],
@@ -91,12 +94,19 @@ class Trainer:
             self.run_epoch()
             # save model checkpoint
             self.save_model()
-            generate_airplane_voxel_image(self.model, self.epoch, self.visual_path, self.device)
-            for item_class, item_list in self.tracked_val_samples.items():
-                for i, pair in enumerate(item_list):
-                    if self.epoch == 0:
-                        generate_original_voxel_image(pair[1], i, class_mapping[str(item_class)], self.visual_path)
-                    generate_voxel_image_from_model(self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
+
+            if self.epoch%5==0:
+                generate_airplane_voxel_image(self.model, self.epoch, self.visual_path, self.device)
+                for item_class, item_list in self.tracked_val_samples.items():
+                    for i, pair in enumerate(item_list):
+                        if self.epoch == 0:
+                            generate_original_voxel_image("Validation", pair[1], i, class_mapping[str(item_class)], self.visual_path)
+                        generate_voxel_image_from_model("Validation", self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
+                for item_class, item_list in self.tracked_train_samples.items():
+                    for i, pair in enumerate(item_list):
+                        if self.epoch == 0:
+                            generate_original_voxel_image("Train", pair[1], i, class_mapping[str(item_class)], self.visual_path)
+                        generate_voxel_image_from_model("Train", self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
 
         # save scores across epochs
         self.train_metrics.save()
