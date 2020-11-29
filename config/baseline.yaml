@@ -12,9 +12,5 @@ num_filters: 32
 exp_dir: exp
 exp_name: baseline_test
 
-# evaluation
-eval_dir: eval
-eval_name: baseline_eval
-
 # dataset
 data_path: data

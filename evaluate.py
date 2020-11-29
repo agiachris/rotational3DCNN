@@ -24,6 +24,7 @@ class Evaluator:
         """
         # get experiment configuration file
         osj = os.path.join
+        oss = os.path.split
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         config = get_config(base_path, args.config)
@@ -31,21 +32,22 @@ class Evaluator:
         config_path = osj(base_path, 'config')
 
         # create experiment, logging, and model checkpoint directories
-        self.eval_dir = osj(osj(base_path, config['eval_dir']), config['eval_name'])
-        self.visual_path = osj(self.eval_dir, "visuals")
+        model_name = os.path.split(args.model)[1].split('.')[0]
+        self.eval_dir = osj(base_path, oss(args.config)[0], 'eval_' + model_name)
+        self.visual_path = osj(self.eval_dir, 'visuals')
         if os.path.exists(self.eval_dir):
             print("Error: This evaluation already exists")
             print("Cancel Session:    0")
             print("Overwrite:         1")
             if input() == str(1):
-                shutil.rmtree(self.exp_dir)
+                shutil.rmtree(self.eval_dir)
             else:
                 exit(1)
         os.mkdir(self.eval_dir)
         os.mkdir(self.visual_path)
 
         # Device
-        self.device = torch.device("cpu" if args.gpuid=='cpu' else "cuda:{}".format(args.gpuid))
+        self.device = torch.device("cpu" if args.gpuid == 'cpu' else "cuda:{}".format(args.gpuid))
 
         # Model - load pre-trained
         model = get_model(config)
@@ -57,7 +59,8 @@ class Evaluator:
         self.criterion = nn.MSELoss()
 
         # Dataset and DataLoader
-        self.dataset = ShapeNet(config, config_path, args.type)
+        self.data_type = args.data
+        self.dataset = ShapeNet(config, config_path, args.data)
         self.tracked_samples = extract_categories(self.dataset.samples, 3)
         self.loader = DataLoader(self.dataset, batch_size=config['batch_size'],
                                  shuffle=True, num_workers=1, drop_last=False)
@@ -66,7 +69,7 @@ class Evaluator:
 
         # Metrics
         self.metrics = Metric(config)
-        self.metric_tracker = MetricTracker(config, '', args.data)
+        self.metric_tracker = MetricTracker(config, self.eval_dir, args.data)
         self.epoch = 0
 
     def eval(self):
@@ -84,13 +87,13 @@ class Evaluator:
             l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
             self.metric_tracker.store(l2, iou, acc, loss.detach().cpu().item())
 
-            if i % 10 == 0:
-                print("batch {} of {}".format(i, len(self.loader)))            
-                print("Accuracy:",acc,"IOU:",iou,"Loss:",loss)
             for item_class, item_list in self.tracked_samples.items():
                 for i, pair in enumerate(item_list):
-                    generate_original_voxel_image(pair[1], i, class_mapping[str(item_class)], self.visual_path)
-                    generate_voxel_image_from_model(self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
+                    generate_original_voxel_image(self.data_type, pair[1], i,
+                                                  class_mapping[str(item_class)], self.visual_path)
+                    generate_voxel_image_from_model(self.data_type, self.model, pair[0], i,
+                                                    class_mapping[str(item_class)], self.epoch,
+                                                    self.visual_path, self.device)
 
         # average metrics over epoch
         ss = (time.time() - val_time) / (self.dataset.__len__())
