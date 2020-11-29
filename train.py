@@ -103,13 +103,19 @@ class Trainer:
                 for item_class, item_list in self.tracked_val_samples.items():
                     for i, pair in enumerate(item_list):
                         if self.epoch == 0:
-                            generate_original_voxel_image("Validation", pair[1], i, class_mapping[str(item_class)], self.visual_path)
-                        generate_voxel_image_from_model("Validation", self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
+                            generate_original_voxel_image("Validation", pair[1], i,
+                                                          class_mapping[str(item_class)], self.visual_path)
+                        generate_voxel_image_from_model("Validation", self.model, pair[0], i,
+                                                        class_mapping[str(item_class)], self.epoch,
+                                                        self.visual_path, self.device)
                 for item_class, item_list in self.tracked_train_samples.items():
                     for i, pair in enumerate(item_list):
                         if self.epoch == 0:
-                            generate_original_voxel_image("Train", pair[1], i, class_mapping[str(item_class)], self.visual_path)
-                        generate_voxel_image_from_model("Train", self.model, pair[0], i, class_mapping[str(item_class)], self.epoch, self.visual_path, self.device)
+                            generate_original_voxel_image("Train", pair[1], i,
+                                                          class_mapping[str(item_class)], self.visual_path)
+                        generate_voxel_image_from_model("Train", self.model, pair[0], i,
+                                                        class_mapping[str(item_class)], self.epoch,
+                                                        self.visual_path, self.device)
 
         # save scores across epochs
         self.train_metrics.save()

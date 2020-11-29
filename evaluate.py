@@ -50,13 +50,13 @@ class Evaluater:
 
         # Metrics
         self.metrics = Metric(config)
+        self.metric_tracker = MetricTracker(config, '', args.data)
         self.epoch = 0
-
 
     def eval(self):
         self.model.eval()
         val_time = time.time()
-        for i, sample in enumerate(self.val_loader, 0):
+        for i, sample in enumerate(self.loader, 0):
             inputs = sample['inputs'].to(self.device)
             targets = sample['targets'].to(self.device)
 
@@ -66,14 +66,14 @@ class Evaluater:
 
             # track accuracy, IoU, and loss
             l2, iou, acc = self.get_metrics(preds.detach().cpu(), targets.detach().cpu())
-            self.metrics.store(l2, iou, acc, loss.detach().cpu().item())
+            self.metric_tracker.store(l2, iou, acc, loss.detach().cpu().item())
 
         # average metrics over epoch
         ss = (time.time() - val_time) / (self.dataset.__len__())
-        self.metrics.store_epoch()
-        l2, iou, acc, loss = self.metrics.get_latest()
+        self.metric_tracker.store_epoch()
+        l2, iou, acc, loss = self.metric_tracker.get_latest()
         print("Evaluation results - l2: {:.3f}  |  iou: {:.3f}  |  acc: {:.3f}  |  loss: {:.3f} |   sec/sample: {:.2f}"
-            .format(l2, iou, acc, loss, ss))
+              .format(l2, iou, acc, loss, ss))
 
     def get_metrics(self, preds, targets):
         """Compute batch accuracy and IoU
@@ -93,7 +93,8 @@ class Evaluater:
     def load_model(self, model_path):
         """Load state dictionary of model
         """
-
+        state_dict = torch.load(model_path)
+        self.model.load_state_dict(state_dict)
 
 
 if __name__ == '__main__':
