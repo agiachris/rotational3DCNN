@@ -56,7 +56,7 @@ class ResidualUNet(nn.Module):
         super(ResidualUNet, self).__init__()
         self.pool = nn.MaxPool3d(2, 2)
 
-        # encoder
+        # residual encoder
         self.conv1 = nn.Conv3d(1, 16, 1)
         self.res_1 = ResidualBlock(16, 32)
         self.res_2 = ResidualBlock(32, 64)
@@ -64,7 +64,7 @@ class ResidualUNet(nn.Module):
         self.res_4 = ResidualBlock(128, 256)
         self.res_5 = ResidualBlock(256, 256)
 
-        # decoder
+        # standard double convolution decoder
         self.up_1 = nn.ConvTranspose3d(256, 256, 2, 2)
         self.dec_1 = DoubleConv(256, 128)
         self.up_2 = nn.ConvTranspose3d(128, 128, 2, 2)
@@ -81,7 +81,7 @@ class ResidualUNet(nn.Module):
         x2 = self.res_2(self.pool(x1))          # 16 x 64
         x3 = self.res_3(self.pool(x2))          # 8 x 128
         x4 = self.res_4(self.pool(x3))          # 4 x 256
-        x5 = self.res_5(self.pool(x4))          # 1 x 256
+        x5 = self.res_5(self.pool(x4))          # 2 x 256
 
         # decoder
         x6 = self.dec_1(self.up_1(x5) + x4)     # 4 x 128

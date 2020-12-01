@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class ASPPModule(nn.ModuleList):
+
     def __init__(self, dilations, in_channels, channels, conv_cfg, norm_cfg,
                  act_cfg):
         super(ASPPModule, self).__init__()
