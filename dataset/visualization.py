@@ -280,7 +280,7 @@ def compare_experiments(names, paths, metrics, save_path, epochs=15):
 
     # generate and save plots
     for metric in metrics:
-        plt.figure()
+        fig = plt.figure()
         plt.title("{} Model Comparison".format(metric))
         plt.xlabel("Epoch")
         plt.ylabel(metric)
@@ -290,9 +290,11 @@ def compare_experiments(names, paths, metrics, save_path, epochs=15):
                 plt.plot(range(1, epochs+1), data[name][metric][split][:epochs], label='{}_{}'.format(name, split))
 
         plt.savefig(os.path.join(save_dir, '{}_curve.png'.format(metric)))
+        plt.close(fig)
 
 
 if __name__ == '__main__':
+    # Used specifically for generating metric curves across experiments
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     metrics = ['l2', 'iou', 'acc', 'loss']
     names = ['baseline', 'residual']
