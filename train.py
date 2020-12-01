@@ -98,7 +98,7 @@ class Trainer:
             # save model checkpoint
             self.save_model()
 
-            if self.epoch%5==0:
+            if self.epoch%1==0:
                 generate_airplane_voxel_image(self.model, self.epoch, self.visual_path, self.device)
                 for item_class, item_list in self.tracked_val_samples.items():
                     for i, pair in enumerate(item_list):
