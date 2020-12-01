@@ -1,14 +1,12 @@
 import os
+import torch
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
-
-
 from utils import *
 from torch.utils.data import DataLoader
-import torch
 from dataset.data_utils import *
 from torch.utils.data import Dataset
 
@@ -161,6 +159,7 @@ def generate_voxel_image_from_model(dataset_type, model, tensor_path, idx, tenso
     save_path = os.path.join(save_path, dataset_type + '_predicted_' + tensor_class + str(idx) + "_" + str(epoch) + '.png')
     plt.savefig(save_path)
 
+
 def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, save_path):
     """ DF 3D tensor """
 
@@ -183,6 +182,7 @@ def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, 
     save_path = os.path.join(save_path, dataset_type+ '_target_' + tensor_class + str(idx) + '.png')
     plt.savefig(save_path)
 
+
 def plot_curves(loss, iou, accuracy, metadata):
     """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponsding metadata
 
@@ -196,7 +196,7 @@ def plot_curves(loss, iou, accuracy, metadata):
         accuracy: nxi array of accuracy, where n - number of curves to compare (usually train vs validation) and i -
                   number of iterations for the plot
 
-	metadata: Array of n strings - what kind of data is present (usually "Train", "Validation")
+    metadata: Array of n strings - what kind of data is present (usually "Train", "Validation")
     """
     plot_a_curve(loss, metadata, "Loss")
     plot_a_curve(iou, metadata, "IOU")
@@ -206,8 +206,8 @@ def plot_curves(loss, iou, accuracy, metadata):
 def plot_a_curve(data, metadata, curve_type):
     """ Plots the curves for a model run, given the arrays loss, iou, accuracy arrays and corresponding metadata.
 
-	metadata: What kind of data is present (usually train, validation)
-	curve_type: (Loss, IOU, Accuracy)
+    metadata: What kind of data is present (usually train, validation)
+    curve_type: (Loss, IOU, Accuracy)
     """
     title = ""
     plt.title("Train vs Validation Error")
@@ -251,3 +251,51 @@ def generate_curve(data, metadata, curve_type, save_path):
 
     save_path = os.path.join(save_path, curve_type + '_curve' + '.png')
     plt.savefig(save_path)
+
+
+def compare_experiments(names, paths, metrics, save_path, epochs=15):
+    """Generate plots comparing desired metrics across given models.
+    args:
+        :names: Names of the experiment corresponding to paths
+        :paths: List of paths to the experiment directories
+        :metrics: Desired metrics to generate plots of
+        :save_path: path to save the plots
+        :epochs: the number of data samples to plot
+    """
+    save_name = 'compare_{}epo_'.format(epochs)
+    for name in names:
+        save_name += name + '_'
+    save_dir = os.path.join(save_path, save_name)
+    os.mkdir(save_dir)
+
+    # load data from experiment directories
+    data = {}
+    for name, path in zip(names, paths):
+        if name not in data:
+            data[name] = {}
+        for metric in metrics:
+            data[name][metric] = {}
+            for split in ['train', 'val']:
+                data[name][metric][split] = np.load(os.path.join(path, '{}_{}'.format(split, metric)))
+
+    # generate and save plots
+    for metric in metrics:
+        plt.figure()
+        plt.title("{} Model Comparison".format(metric))
+        plt.xlabel("Epoch")
+        plt.ylabel(metric)
+        plt.legend(loc='best')
+        for name in names:
+            for split in ['train', 'val']:
+                plt.plot(range(1, epochs+1), data[name][metric][split][:epochs], label='{}_{}'.format(name, split))
+
+        plt.savefig(os.path.join(save_dir, '{}_curve.png'.format(metric)))
+
+
+if __name__ == '__main__':
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    metrics = ['l2', 'iou', 'acc', 'loss']
+    names = ['baseline', 'residual']
+    paths = ['exp/baseline_15epochs/', 'exp/residual_unet']
+    paths = [os.path.join(base_path, p, 'logs') for p in paths]
+    compare_experiments(names, paths, metrics, os.path.join(base_path, 'exp'))
