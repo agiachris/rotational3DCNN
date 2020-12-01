@@ -33,7 +33,7 @@ class Evaluator:
 
         # create experiment, logging, and model checkpoint directories
         model_name = os.path.split(args.model)[1].split('.')[0]
-        self.eval_dir = osj(base_path, oss(args.config)[0], 'eval_' + model_name)
+        self.eval_dir = osj(base_path, oss(args.config)[0], 'eval_' + args.data + '_' + model_name)
         self.visual_path = osj(self.eval_dir, 'visuals')
         if os.path.exists(self.eval_dir):
             print("Error: This evaluation already exists")
