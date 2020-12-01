@@ -101,6 +101,7 @@ class Evaluator:
         l2, iou, acc, loss = self.metric_tracker.get_latest()
         print("Evaluation results - l2: {:.3f}  |  iou: {:.3f}  |  acc: {:.3f}  |  loss: {:.3f} |   sec/sample: {:.2f}"
               .format(l2, iou, acc, loss, ss))
+        self.metric_tracker.save()
 
     def get_metrics(self, preds, targets):
         """Compute batch accuracy and IoU
