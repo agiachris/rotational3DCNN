@@ -5,11 +5,11 @@ dr: 5e-4
 num_epochs: 15
 
 # model
-model: residual_unet
+model: class_centric
 
 # experiment
 exp_dir: exp
-exp_name: residual_unet
+exp_name: class_centric
 
 # dataset
 data_path: data
