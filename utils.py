@@ -3,7 +3,7 @@ import yaml
 import torch
 import numpy as np
 from collections import Counter
-from models import (UNet3dBaseline, ResidualUNet, ClassCentricUNet)
+from models import (UNet3dBaseline, ResidualUNet, SEResidualUNet)
 from dataset.visualization import generate_curve
 
 
@@ -31,8 +31,8 @@ def get_model(config):
         return UNet3dBaseline.UNet3dBaseline(1, 1, num_filters)
     elif config['model'] == 'residual_unet':
         return ResidualUNet.ResidualUNet()
-    elif config['model'] == 'class_centric':
-        return ClassCentricUNet.ResidualUNet()
+    elif config['model'] == 'se_residual_unet':
+        return SEResidualUNet.ResidualUNet()
     else:
         print("No model found")
         exit(1)

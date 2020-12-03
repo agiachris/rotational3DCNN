@@ -10,7 +10,7 @@ num_filters: 32
 
 # experiment
 exp_dir: exp
-exp_name: baseline_test
+exp_name: baseline_batch_32_lr0_001_num_epochs5_leaky_relu
 
 # dataset
 data_path: data

@@ -5,8 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.cm as cm
-from utils import *
-from torch.utils.data import DataLoader
+import utils
 from dataset.data_utils import *
 from torch.utils.data import Dataset
 
@@ -131,6 +130,7 @@ def generate_airplane_voxel_image(model, epoch, save_path, device):
 
     save_path = os.path.join(save_path, '_sample_airplane_' + str(epoch) + '.png')
     plt.savefig(save_path)
+    plt.close(fig)
 
 
 def generate_voxel_image_from_model(dataset_type, model, tensor_path, idx, tensor_class, epoch, save_path, device):
@@ -158,6 +158,7 @@ def generate_voxel_image_from_model(dataset_type, model, tensor_path, idx, tenso
 
     save_path = os.path.join(save_path, dataset_type + '_predicted_' + tensor_class + str(idx) + "_" + str(epoch) + '.png')
     plt.savefig(save_path)
+    plt.close(fig)
 
 
 def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, save_path):
@@ -181,6 +182,7 @@ def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, 
 
     save_path = os.path.join(save_path, dataset_type+ '_target_' + tensor_class + str(idx) + '.png')
     plt.savefig(save_path)
+    plt.close(fig)
 
 
 def plot_curves(loss, iou, accuracy, metadata):
@@ -251,53 +253,4 @@ def generate_curve(data, metadata, curve_type, save_path):
 
     save_path = os.path.join(save_path, curve_type + '_curve' + '.png')
     plt.savefig(save_path)
-
-
-def compare_experiments(names, paths, metrics, save_path, epochs=15):
-    """Generate plots comparing desired metrics across given models.
-    args:
-        :names: Names of the experiment corresponding to paths
-        :paths: List of paths to the experiment directories
-        :metrics: Desired metrics to generate plots of
-        :save_path: path to save the plots
-        :epochs: the number of data samples to plot
-    """
-    save_name = 'compare_{}epo_'.format(epochs)
-    for name in names:
-        save_name += name + '_'
-    save_dir = os.path.join(save_path, save_name)
-    os.mkdir(save_dir)
-
-    # load data from experiment directories
-    data = {}
-    for name, path in zip(names, paths):
-        if name not in data:
-            data[name] = {}
-        for metric in metrics:
-            data[name][metric] = {}
-            for split in ['train', 'val']:
-                data[name][metric][split] = np.load(os.path.join(path, '{}_{}'.format(split, metric)))
-
-    # generate and save plots
-    for metric in metrics:
-        fig = plt.figure()
-        plt.title("{} Model Comparison".format(metric))
-        plt.xlabel("Epoch")
-        plt.ylabel(metric)
-        plt.legend(loc='best')
-        for name in names:
-            for split in ['train', 'val']:
-                plt.plot(range(1, epochs+1), data[name][metric][split][:epochs], label='{}_{}'.format(name, split))
-
-        plt.savefig(os.path.join(save_dir, '{}_curve.png'.format(metric)))
-        plt.close(fig)
-
-
-if __name__ == '__main__':
-    # Used specifically for generating metric curves across experiments
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    metrics = ['l2', 'iou', 'acc', 'loss']
-    names = ['baseline', 'residual']
-    paths = ['exp/baseline_15epochs/', 'exp/residual_unet']
-    paths = [os.path.join(base_path, p, 'logs') for p in paths]
-    compare_experiments(names, paths, metrics, os.path.join(base_path, 'exp'))
+    plt.close()

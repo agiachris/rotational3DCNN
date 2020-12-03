@@ -31,7 +31,7 @@ class UNet3dBaseline(nn.Module):
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.num_filters = num_filters
-        activation = nn.ReLU()
+        activation = nn.LeakyReLU()
         
         # Down sampling
         self.pool = max_pooling_3d()

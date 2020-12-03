@@ -9,7 +9,7 @@ model: residual_unet
 
 # experiment
 exp_dir: exp
-exp_name: residual_unet
+exp_name: residual_unet_leaky_relu
 
 # dataset
 data_path: data

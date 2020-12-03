@@ -8,7 +8,7 @@ class PreConv(nn.Module):
         super(PreConv, self).__init__()
         self.conv = nn.Sequential(
             nn.BatchNorm3d(in_c),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Conv3d(in_c, out_c, k, s, p, bias=False)
         )
 
