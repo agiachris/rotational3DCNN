@@ -1,15 +1,17 @@
 # hyper-parameters
 batch_size: 32
-lr: 1e-3
-dr: 5e-4
+lr: 1e-4
+dr: 3e-4
 num_epochs: 15
 
 # model
-model: class_centric
+model: se_residual_unet
 
 # experiment
 exp_dir: exp
-exp_name: class_centric
+exp_name: se_residual_unet_15epochs_0_0001_lr_0_0003_dr
 
 # dataset
 data_path: data
+
+

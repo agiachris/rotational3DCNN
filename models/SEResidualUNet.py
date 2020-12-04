@@ -1,5 +1,22 @@
 import torch.nn as nn
 
+class SE_Block(nn.Module):
+    #the se_block found online
+    def __init__(self, c, r=16):
+        super().__init__()
+        self.squeeze = nn.AdaptiveAvgPool3d(1)
+        self.excitation = nn.Sequential(
+            nn.Linear(c, c // r, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(c // r, c, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        bs, c, _, _, _ = x.shape
+        y = self.squeeze(x).view(bs, c)
+        y = self.excitation(y).view(bs, c, 1, 1, 1)
+        return x * y.expand_as(x)
 
 class PreConv(nn.Module):
 
@@ -24,10 +41,14 @@ class ResidualBlock(nn.Module):
         self.conv_1 = PreConv(in_c, out_c, 3, 1, 1)
         self.conv_2 = PreConv(out_c, out_c, 3, 1, 1)
         self.linear = nn.Conv3d(in_c, out_c, 1, 1)
+        self.se = SE_Block(out_c, 16)
 
     def forward(self, x):
         skip = self.linear(x)
-        return skip + self.conv_2(self.conv_1(x))
+
+        # add SE operation
+        out = skip + self.se(  self.conv_2(self.conv_1(x))   )
+        return out
 
 
 class DoubleConv(nn.Module):
@@ -90,3 +111,4 @@ class ResidualUNet(nn.Module):
         x9 = self.dec_4(self.up_4(x8) + x1)     # 32 x 16
 
         return self.out_conv(x9)
+

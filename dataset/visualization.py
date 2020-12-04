@@ -160,6 +160,32 @@ def generate_voxel_image_from_model(dataset_type, model, tensor_path, idx, tenso
     plt.savefig(save_path)
     plt.close(fig)
 
+def generate_original_SDF_voxel_image(dataset_type, tensor_path, idx, tensor_class, save_path):
+    """ DF 3D tensor """
+
+    target_tensor = tensor_from_file(tensor_path)
+    tensor = torch.from_numpy(target_tensor).unsqueeze(0)
+
+    if len(tensor.shape) == 4:
+        tensor = np.squeeze(tensor, 0)
+
+    # find voxels with finite sdf values
+    finite_region = np.isfinite(tensor) * 1
+
+    # extract finite values
+    volume = np.greater(finite_region, 0)
+    volumeTransposed = np.transpose(volume, (2, 0, 1))
+
+    fig = plt.figure(dataset_type + ": input " + tensor_class + " " + str(idx))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.voxels(volumeTransposed)
+
+    # label figure
+    plt.title(dataset_type + ": input " + tensor_class + " " + str(idx))
+
+    save_path = os.path.join(save_path, dataset_type+ '_input_' + tensor_class + str(idx) + '.png')
+    plt.savefig(save_path)
+    plt.close(fig)
 
 def generate_original_voxel_image(dataset_type, tensor_path, idx, tensor_class, save_path):
     """ DF 3D tensor """

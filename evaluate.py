@@ -61,7 +61,7 @@ class Evaluator:
         # Dataset and DataLoader
         self.data_type = args.data
         self.dataset = ShapeNet(config, config_path, args.data)
-        self.tracked_samples = extract_categories(self.dataset.samples, 2)
+        self.tracked_samples = extract_categories(self.dataset.samples, 5)
         self.loader = DataLoader(self.dataset, batch_size=config['batch_size'],
                                  shuffle=True, num_workers=1, drop_last=False)
 
@@ -75,6 +75,10 @@ class Evaluator:
     def eval(self):
         self.model.eval()
         val_time = time.time()
+
+        pytorch_total_params = sum(p.numel() for p in self.model.parameters()) 
+        np.savetxt(self.eval_dir + '/number_of_model_params', [pytorch_total_params])
+
         for i, sample in enumerate(self.loader, 0):
             inputs = sample['inputs'].to(self.device)
             targets = sample['targets'].to(self.device)
@@ -89,6 +93,8 @@ class Evaluator:
 
         for item_class, item_list in self.tracked_samples.items():
             for i, pair in enumerate(item_list):
+                generate_original_SDF_voxel_image(self.data_type, pair[0], i,
+                                                class_mapping[str(item_class)], self.visual_path)
                 generate_original_voxel_image(self.data_type, pair[1], i,
                                                 class_mapping[str(item_class)], self.visual_path)
                 generate_voxel_image_from_model(self.data_type, self.model, pair[0], i,
