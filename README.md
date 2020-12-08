@@ -1,5 +1,7 @@
 # rotational3DCNN
 
+# this project is a team of 4: Christopher Agia, Polina Govorkova, YiFei Tang and Chao glen Xu. we shared the github account called "nicknagi"  to git push some work we did on the computer connected the gpu we used. 
+
 ### APS360 Final Project - Rotation Invariant 3D Shape Completion Network
 
 This project aims to design a system capable of reconstructing 3-dimensional objects from a partially complete voxelized representation. Provided that the baseline task is completed with considerable results, we will investigate the effects of partial object rotation on the model’s performance, and attempt to design for a rotationally invariant reconstruction network.
