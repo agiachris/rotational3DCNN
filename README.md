@@ -31,8 +31,4 @@ python evaluate.py --config config/path --model path/to/model --data data_split 
 - [x] Visualization class (Polina)
 - [x] Evalutor class for model evaluation (YiFei & Chris)
 - [x] Integrate visualization into training / validation (Polina)
-
-
-### Open Tasks 
-- [ ] Design variations of the baseline model (Team)
-	- Model should also attempt to classify the model type as a prior for reconstruction
+- [x] Design variations of the baseline model (Team)
