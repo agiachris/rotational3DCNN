@@ -1,6 +1,6 @@
 # rotational3DCNN
 
-# this project is a team of 4: Christopher Agia, Polina Govorkova, YiFei Tang and Chao glen Xu. we shared the github account called "nicknagi"  to git push some work we did on the computer connected the gpu we used. 
+Note: this project was exclusively by Christopher Agia, Polina Govorkova, YiFei Tang and Chao Glen Xu. The github account "nicknagi" corresponds to the account on the GPU computer and was not an additional contributor for this project.
 
 ### APS360 Final Project - Rotation Invariant 3D Shape Completion Network
 
