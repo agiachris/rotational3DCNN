@@ -9,7 +9,7 @@ Recent years have brought forth various technologies that depend heavily on sens
 
 In this project, we address a component of this challenge by designing a deep learning solution capable of reconstructing 3-dimensional objects from a partially complete voxelized representation. We represent the partial shapes of objects in terms of a perspective signed distance field (SDF, i.e. input) and infer a perspective-invariant distance field of the completed shape (DF, i.e. target), as illustrated in Fig. 1. Through this formulation, we hypothesize that the CNNs must learn rotationally or perspective invariant representations of objects belonging to the set of eight class categories contained in our dataset. 
 
-<img src="https://github.com/agiachris/rotational3DCNN/blob/main/project_description_and_results/proposal_overview.png" height="250" />
+<img src="https://github.com/agiachris/rotational3DCNN/blob/main/project_description_and_results/proposal_overview.png" height="400" />
 
 ## Data
 The source of our data is the ShapeNetCore subset of the ShapeNet database, which has been curated for our particular task by Dai et al. They go through an extensive process to produce signed distance field (SDF) and distance field (DF) input-target pairs, which altogether form the Stanford Graphics Shape Completion Benchmark.
