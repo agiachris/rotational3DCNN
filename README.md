@@ -20,7 +20,7 @@ We propose two CNN models that incorporate a unique set of 3D convolutional modu
 #### Residual U-Net 
 The model features an encoder composed of Residual Blocks, a decoder composed of DoubleConv Blocks, and skip connections that add the encoder’s voxel features to those of the decoder at various scale spaces. The skip connections help to maintain the fine-grained details of the shape’s input, and in combination with the Residual Blocks promotes fast and stable learning with improved gradient flow to the CNN encoder. Voxel-wise addition is preferred to concatenation for computational efficiency and to reduce the kernel sizes in the decoder. 
 #### SE Residual U-Net
-The model has an encoder built from Squeeze and Excite (SE) Residual Blocks [13], but is otherwise identical to the first model. The SE blocks enable the network to learn inter-channel dependencies that could exploit complementing voxel features at minimal cost.
+The model has an encoder built from Squeeze and Excite (SE) Residual Blocks, but is otherwise identical to the first model. The SE blocks enable the network to learn inter-channel dependencies that could exploit complementing voxel features at minimal cost.
 
 <img src="https://github.com/agiachris/rotational3DCNN/blob/main/project_description_and_results/proposal_system.png" height="400" />
 
